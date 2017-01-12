@@ -57,7 +57,7 @@ var Atlanta = React.createClass({
 		$.getJSON(url, (weatherData) =>{
 			this.setState({
 				weatherData: weatherData,
-				currentTemp: weatherData.main.temp,
+				currentTemp: weatherData.main.temp + 'degrees Fahrenheit',
 				currentCode: weatherData.weather[0].id,
 				currentCondition: weatherData.weather[0].description,
 				name: weatherData.name,
@@ -161,7 +161,8 @@ var Atlanta = React.createClass({
 			<div className="container">
 				<div className="row text-center weather-row">
 					<h1>Real-time Atlanta Weather!</h1>
-
+					<h4>High: {this.state.temp_max}&deg;</h4>
+					<h4>Low: {this.state.temp_min}&deg;</h4>
 					<div id="currentTemp">
 					</div>
 
