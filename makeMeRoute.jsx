@@ -4,6 +4,8 @@ var atlImages = [
 	'https://upload.wikimedia.org/wikipedia/commons/a/a3/Piedmont-park-urban-park.jpg'
 ]
 
+
+
 var About = React.createClass({
 	render: function(){
 		return(
@@ -39,45 +41,162 @@ var Atlanta = React.createClass({
 	getInitialState: function() {
 		return({
 			icon: "",
-			temp: "",
+			currentTemp: "",
+			currentCode: "",
+			currentCondition: "",
+			name: "",
+			windSpeed: "",
 			temp_min: "",
 			temp_max: "",
+			humidity: "",
 			desc: ""
 		})
 	},
 	componentDidMount: function() {
 		var url = 'http://api.openweathermap.org/data/2.5/weather?units=imperial&zip=30305,us&appid=482c145ce8edf1d69ea5168f9d06460c';
 		$.getJSON(url, (weatherData) =>{
-			console.log(weatherData);
 			this.setState({
-				temp: weatherData.main.temp,
+				weatherData: weatherData,
+				currentTemp: weatherData.main.temp,
+				currentCode: weatherData.weather[0].id,
+				currentCondition: weatherData.weather[0].description,
+				name: weatherData.name,
+				icon: weatherData.weather[0].icon + '.png',
+				windSpeed: weatherData.wind.speed,
 				temp_max: weatherData.main.temp_max,
 				temp_min: weatherData.main.temp_min,
-				icon: weatherData.weather[0].icon,
-				desc: weatherData.weather[0].description,
+				humidity: weatherData.main.humidity,
+				desc: weatherData.weather[0].description
 			})
+		
+			$(document).ready(function(){
+				// console.log(weatherData);
+				var currentCode = weatherData.weather[0].id;
+				var currentCondition = weatherData.weather[0].description;
+				var windSpeed = weatherData.wind.speed;
+				var humidity = weatherData.main.humidity;
+				var currentTemp = weatherData.main.temp;
+				var icon = weatherData.weather[0].icon + '.png';
+				$('#currentTemp').html("<img src='http://openweathermap.org/img/w/"+ icon +"'></img>The temp is currently " + currentTemp);
+				var canvas = $('#weather-canvas');
+				var context = canvas[0].getContext('2d');
+				$('#wind span').html(windSpeed);
+				$('#humidity span').html(humidity);
+
+				var lineColor = 'black';
+				if(currentTemp < 32){
+					lineColor = '#AAF7FF';
+				}else if(currentTemp < 60){
+					lineColor = '#129793';
+				}else if(currentTemp < 70){
+					lineColor = '#80f470';
+				}else if(currentTemp < 80){
+					lineColor = '#ffc32d';
+				}else{
+					lineColor = '#f74f5d';
+				}
+
+				if(currentCode < 300){
+					$('.container').css('background-image', 'url("thunderstorm.jpg")');
+				}else if(currentCode < 400){
+					$('.container').css('background-image', 'url("drizzle.jpg")');
+				}else if(currentCode < 505){
+					$('.container').css('background-image', 'url("rain.jpg")');
+				}else if(currentCode == 511){
+					$('.container').css('background-image', 'url("freezing-rain.jpg")');
+				}else if(currentCode < 540){
+					$('.container').css('background-image', 'url("heavy-rain.jpg")');
+				}else if(currentCode < 650){
+					$('.container').css('background-image', 'url("snow.jpg")');
+				}else if(currentCode < 790){
+					$('.container').css('background-image', 'url("mist.jpg")');
+				}else if(currentCode == 800){
+					$('.container').css('background-image', 'url("clear-sky.jpg")');
+				}else if(currentCode == 801){
+					$('.container').css('background-image', 'url("few-clouds.jpg")');
+				}else if(currentCode < 805){
+					$('.container').css('background-image', 'url("cloudy.jpg")');
+				}else{
+					$('.container').css('background-image', 'url("wind.jpg")');
+				}
+
+				
+				var currentPercent = 0;
+				function animate(current){
+					context.clearRect(0,0,500, 500);
+					context.fillStyle = "rgba(100,100,100,.4)";
+					context.beginPath();
+					context.arc(155,75,50,Math.PI * 0,Math.PI * 2);
+					context.closePath();
+					context.fill();
+
+					context.font = "20px Arial";
+					context.fillStyle = '#333';
+					context.fillText(currentCondition,20,30);
+
+					context.font = "40px Arial";
+					context.fillStyle = '#FFF';
+					context.fillText((Math.floor(currentTemp) + "\xB0F"),110,90);
+
+					context.lineWidth = 20;
+					context.strokeStyle = lineColor;
+					context.beginPath();
+					context.arc(155,75,60,Math.PI * 1.5,Math.PI * 2 * current + Math.PI * 1.5);
+					context.stroke();
+					currentPercent++;
+					if(currentPercent < currentTemp){
+						requestAnimationFrame(function(){
+							animate(currentPercent / 100);
+						});
+					}
+
+				}
+				animate();
+			});
 		});
 	},
+
 	render: function(){
 		return(
-			<div>
-				<h1>Real-time Atlanta Weather!</h1>
-				<p>The temp is: {this.state.temp}</p>
+			<div className="container">
+				<div className="row text-center weather-row">
+					<h1>Real-time Atlanta Weather!</h1>
+
+					<div id="currentTemp">
+					</div>
+
+					<canvas id="weather-canvas">
+					</canvas>
+					<div id="weather-details">
+						<div id="wind">
+							Wind: <span></span> mph
+						</div>
+						<div id="humidity">
+							Humidity: <span></span>%
+						</div>
+					</div>
+				</div>
 			</div>
 		);
 	}
 });
 
 function Images(props){
-	// Map through images
 	return(
-		<p>Images go here as props</p>
+		<div>
+			{props.route.images.map(function(image, index){
+				return <img className="atlImage" key={index} src={image}/>
+			})}
+		</div>		
 	)
 }
 
 function Home(props){
 	return (
+		<div>
 		<h1>A page about Atlanta!</h1>
+		<MayorMessage />
+		</div>
 	)
 }
 
@@ -87,14 +206,13 @@ var BootstrapNavBar = React.createClass({
 		<nav className="navbar navbar-default navbar-fixed-top">
 		  <div className="container-fluid">
 		    <div className="navbar-header">
-		      <a className="navbar-brand" href="#">WebSiteName</a>
+		      <a className="navbar-brand" >Welcome to the ATL</a>
 		    </div>
 		    <ul className="nav navbar-nav">
-		    	<li><ReactRouter.Link to="/">Home</ReactRouter.Link></li>
-		      	<li><ReactRouter.Link to="/one">One</ReactRouter.Link></li>
-		      	<li><ReactRouter.Link to="/two">Two</ReactRouter.Link></li>
-		      	<li><ReactRouter.Link to="/three">Three</ReactRouter.Link></li>
-		      	<li><ReactRouter.Link to="/four">Four</ReactRouter.Link></li>
+		    	<li><ReactRouter.Link activeClassName="active" to="/">Home</ReactRouter.Link></li>
+		      	<li><ReactRouter.Link activeClassName="active" to="/about">About</ReactRouter.Link></li>
+		      	<li><ReactRouter.Link activeClassName="active" to="/images">Images</ReactRouter.Link></li>
+		      	<li><ReactRouter.Link activeClassName="active" to="/weather">Weather</ReactRouter.Link></li>
 		    </ul>
 		  </div>
 		</nav>    
@@ -107,8 +225,8 @@ var App = React.createClass({
 		return(
 			<div>
 				<BootstrapNavBar />
-				<div className="main">
-					<h1>Main App</h1>
+				<div className="main col-sm-8 col-sm-offset-2">
+					{this.props.children}
 				</div>
 			</div>
 		);
@@ -117,6 +235,13 @@ var App = React.createClass({
 
 
 ReactDOM.render(
-	<App />,
+	<ReactRouter.Router>
+		<ReactRouter.Route path="/" component={App}>
+			<ReactRouter.IndexRoute component={Home} />
+			<ReactRouter.Route path="/about" component={About} />
+			<ReactRouter.Route path="/images" component={Images} images={atlImages} />
+			<ReactRouter.Route path="/weather" component={Atlanta} />
+		</ReactRouter.Route>
+	</ReactRouter.Router>,
 	document.getElementById('app')
 )
