@@ -207,10 +207,9 @@ var BootstrapNavBar = React.createClass({
 		<nav className="navbar navbar-default navbar-fixed-top">
 		  <div className="container-fluid">
 		    <div className="navbar-header">
-		      <a className="navbar-brand" >Welcome to the ATL</a>
+		      <ReactRouter.Link className="navbar-brand" to="/">Welcome to the ATL</ReactRouter.Link>
 		    </div>
 		    <ul className="nav navbar-nav">
-		    	<li><ReactRouter.Link activeClassName="active" to="/">Home</ReactRouter.Link></li>
 		      	<li><ReactRouter.Link activeClassName="active" to="/about">About</ReactRouter.Link></li>
 		      	<li><ReactRouter.Link activeClassName="active" to="/images">Images</ReactRouter.Link></li>
 		      	<li><ReactRouter.Link activeClassName="active" to="/weather">Weather</ReactRouter.Link></li>
